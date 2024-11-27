@@ -1,9 +1,52 @@
+'use client'
 import { Box, Button, Container, Grid, Stack, TextField, Typography } from '@mui/material';
 import Image from 'next/image';
 import assets from '@/assets';
 import Link from 'next/link';
+import { useForm, SubmitHandler } from "react-hook-form"
+import { modifyPayload } from '@/utils/modifyPayload';
+import { registerPatient } from '@/Services/actions/registerPatient';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+
+
+interface IPatientData {
+    name: string
+    email: string
+    contactNumber: string
+    address: string
+}
+
+interface IPatientRegisterFormdata {
+    password: string;
+    patient: IPatientData
+}
 
 const RegisterPage = () => {
+    const router = useRouter()
+
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm<IPatientRegisterFormdata>()
+    const onSubmit: SubmitHandler<IPatientRegisterFormdata> = async (values) => {
+        const data = modifyPayload(values)
+        // console.log(data)
+        try {
+            const res = await registerPatient(data)
+            // console.log(res)
+            if (res?.data?.id) {
+                toast.success(res?.message)
+                router.push('/Login')
+            }
+        } catch (err: any) {
+            console.error(err.message)
+        }
+    }
+
+
     return (
         <Container >
             <Stack sx={{
@@ -36,50 +79,55 @@ const RegisterPage = () => {
 
                     {/* input filed  */}
                     <Box>
-                        <form>
+                        <form onSubmit={handleSubmit(onSubmit)}>
                             <Grid container spacing={2} my={1}>
-                                <Grid item md={12} >
+                                <Grid item md={12} sm={12}>
                                     <TextField
                                         label="Name"
+                                        {...register("patient.name")}
                                         variant='outlined'
                                         size='small'
                                         fullWidth={true}
                                     />
                                 </Grid>
-                                <Grid item md={6}>
+                                <Grid item md={6} sm={6}>
                                     <TextField
                                         label="Email"
                                         type='email'
                                         variant='outlined'
                                         size='small'
                                         fullWidth={true}
+                                        {...register("patient.email")}
                                     />
                                 </Grid>
-                                <Grid item md={6}>
+                                <Grid item md={6} sm={6}>
                                     <TextField
                                         label="Password"
                                         type='password'
                                         variant='outlined'
                                         size='small'
                                         fullWidth={true}
+                                        {...register("password")}
                                     />
                                 </Grid>
-                                <Grid item md={6}>
+                                <Grid item md={6} sm={6}>
                                     <TextField
                                         label="Contact Number"
                                         type='tel'
                                         variant='outlined'
                                         size='small'
                                         fullWidth={true}
+                                        {...register("patient.contactNumber")}
                                     />
                                 </Grid>
-                                <Grid item md={6}>
+                                <Grid item md={6} sm={6}>
                                     <TextField
                                         label="Address"
                                         type='text'
                                         variant='outlined'
                                         size='small'
                                         fullWidth={true}
+                                        {...register("patient.address")}
                                     />
                                 </Grid>
                             </Grid>
