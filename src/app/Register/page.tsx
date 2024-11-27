@@ -31,12 +31,14 @@ const RegisterPage = () => {
         watch,
         formState: { errors },
     } = useForm<IPatientRegisterFormdata>()
+
+
     const onSubmit: SubmitHandler<IPatientRegisterFormdata> = async (values) => {
         const data = modifyPayload(values)
         // console.log(data)
         try {
             const res = await registerPatient(data)
-            // console.log(res)
+            console.log(res)
             if (res?.data?.id) {
                 toast.success(res?.message)
                 router.push('/Login')

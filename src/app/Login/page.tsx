@@ -1,10 +1,38 @@
+'use client'
 import assets from '@/assets';
+import { userLogin } from '@/Services/actions/userLogin';
+import { storeUserInfo } from '@/Services/auth.services';
 import { Box, Button, Container, Grid, Stack, TextField, Typography } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
+
+export type FormValues = {
+    email: string;
+    password: string;
+}
 const LoginPge = () => {
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm<FormValues>()
+
+    const onSubmit: SubmitHandler<FormValues> = async (values) => {
+        // console.log(values)
+        try {
+            const res = await userLogin(values);
+            console.log(res)
+            if (res?.data?.accessToken) {
+                storeUserInfo({ accessToken: res?.data?.accessToken })
+            }
+        } catch (err: any) {
+            console.error(err.message)
+        }
+    }
     return (
         <Container>
             <Stack sx={{
@@ -35,7 +63,7 @@ const LoginPge = () => {
                         </Box>
                     </Stack>
                     <Box>
-                        <form>
+                        <form onSubmit={handleSubmit(onSubmit)}>
                             <Grid container spacing={2} my={1}>
 
                                 <Grid item md={6}>
@@ -45,6 +73,7 @@ const LoginPge = () => {
                                         variant='outlined'
                                         size='small'
                                         fullWidth={true}
+                                        {...register("email")}
                                     />
                                 </Grid>
                                 <Grid item md={6}>
@@ -54,6 +83,7 @@ const LoginPge = () => {
                                         variant='outlined'
                                         size='small'
                                         fullWidth={true}
+                                        {...register("password")}
                                     />
                                 </Grid>
                             </Grid>
