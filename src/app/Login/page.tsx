@@ -5,8 +5,10 @@ import { storeUserInfo } from '@/Services/auth.services';
 import { Box, Button, Container, Grid, Stack, TextField, Typography } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 
 export type FormValues = {
@@ -20,6 +22,7 @@ const LoginPge = () => {
         watch,
         formState: { errors },
     } = useForm<FormValues>()
+    const router = useRouter()
 
     const onSubmit: SubmitHandler<FormValues> = async (values) => {
         // console.log(values)
@@ -27,7 +30,9 @@ const LoginPge = () => {
             const res = await userLogin(values);
             console.log(res)
             if (res?.data?.accessToken) {
-                storeUserInfo({ accessToken: res?.data?.accessToken })
+                toast.success(res?.message)
+                storeUserInfo({ accessToken: res?.data?.accessToken }),
+                    router.push('/')
             }
         } catch (err: any) {
             console.error(err.message)
