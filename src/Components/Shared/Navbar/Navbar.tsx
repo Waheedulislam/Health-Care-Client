@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import React from 'react';
 
+
 const Navbar = () => {
     const AuthButton = dynamic(() => import('@/Components/Ui/AuthButton/AuthButton'), { ssr: false })
 

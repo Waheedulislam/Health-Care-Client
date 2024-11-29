@@ -1,30 +1,32 @@
 'use client'
 import assets from '@/assets';
+import PHForm from '@/Components/Forms/PHForm';
+import PHInput from '@/Components/Forms/PHInput';
 import { userLogin } from '@/Services/actions/userLogin';
 import { storeUserInfo } from '@/Services/auth.services';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Container, Grid, Stack, TextField, Typography } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import React, { useState } from 'react';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { z } from 'zod';
+
+export const validationSchema = z.object({
+    email: z.string().email('Please enter a valid email address'),
+    password: z.string().min(6, 'Must be at least 6 characters')
+})
 
 
-export type FormValues = {
-    email: string;
-    password: string;
-}
+
 const LoginPge = () => {
-    const {
-        register,
-        handleSubmit,
-        watch,
-        formState: { errors },
-    } = useForm<FormValues>()
-    const router = useRouter()
 
-    const onSubmit: SubmitHandler<FormValues> = async (values) => {
+    const router = useRouter()
+    const [error, setError] = useState('');
+
+    const handleLogin = async (values: FieldValues) => {
         // console.log(values)
         try {
             const res = await userLogin(values);
@@ -33,9 +35,11 @@ const LoginPge = () => {
                 toast.success(res?.message)
                 storeUserInfo({ accessToken: res?.data?.accessToken }),
                     router.push('/')
+            } else {
+                setError(res.message)
             }
         } catch (err: any) {
-            console.error(err.message)
+            console.error(err.message);
         }
     }
     return (
@@ -67,28 +71,46 @@ const LoginPge = () => {
                             </Typography>
                         </Box>
                     </Stack>
+                    <>
+                        {error && (
+                            <Box>
+                                <Typography sx={{
+                                    backgroundColor: 'red',
+                                    padding: '1px',
+                                    borderRadius: '2px',
+                                    color: 'white',
+                                    marginTop: '5px'
+                                }}>
+                                    {error}
+                                </Typography>
+                            </Box>
+                        )}
+                    </>
                     <Box>
-                        <form onSubmit={handleSubmit(onSubmit)}>
+                        <PHForm
+                            onSubmit={handleLogin}
+                            resolver={zodResolver(validationSchema)}
+                            defaultValues={{
+                                email: '',
+                                password: '',
+                            }}
+                        >
                             <Grid container spacing={2} my={1}>
 
-                                <Grid item md={6}>
-                                    <TextField
+                                <Grid item md={6} sm={6}>
+                                    <PHInput
                                         label="Email"
                                         type='email'
-                                        variant='outlined'
-                                        size='small'
                                         fullWidth={true}
-                                        {...register("email")}
+                                        name='email'
                                     />
                                 </Grid>
-                                <Grid item md={6}>
-                                    <TextField
+                                <Grid item md={6} sm={6}>
+                                    <PHInput
                                         label="Password"
                                         type='password'
-                                        variant='outlined'
-                                        size='small'
                                         fullWidth={true}
-                                        {...register("password")}
+                                        name='password'
                                     />
                                 </Grid>
                             </Grid>
@@ -100,7 +122,7 @@ const LoginPge = () => {
                                 Don&apos;t have an account ? <Link href='/Register' >Create an account</Link>
                             </Typography>
 
-                        </form>
+                        </PHForm>
                     </Box>
                 </Box>
             </Stack>

@@ -3,39 +3,44 @@ import { Box, Button, Container, Grid, Stack, TextField, Typography } from '@mui
 import Image from 'next/image';
 import assets from '@/assets';
 import Link from 'next/link';
-import { useForm, SubmitHandler } from "react-hook-form"
+import { useForm, SubmitHandler, FieldValues } from "react-hook-form"
 import { modifyPayload } from '@/utils/modifyPayload';
 import { registerPatient } from '@/Services/actions/registerPatient';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { userLogin } from '@/Services/actions/userLogin';
 import { storeUserInfo } from '@/Services/auth.services';
+import PHForm from '../../Components/Forms/PHForm';
+import PHInput from '@/Components/Forms/PHInput';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
+export const patientValidationSchema = z.object({
+    name: z.string().min(1, 'please enter your name '),
+    email: z.string().email('Please enter your email address'),
+    contactNumber: z.string().regex(/^\d{11}$/, 'Please provide a valid phone number'),
+    address: z.string().min(1, 'Please enter your address!'),
+})
+export const validationSchema = z.object({
+    password: z.string().min(6, 'Must be at least 6 characters'),
+    patient: patientValidationSchema,
+});
 
-interface IPatientData {
-    name: string
-    email: string
-    contactNumber: string
-    address: string
+export const defaultValues = {
+    password: '',
+    patient: {
+        name: '',
+        email: '',
+        contactNumber: '',
+        address: '',
+    }
 }
 
-interface IPatientRegisterFormdata {
-    password: string;
-    patient: IPatientData
-}
 
 const RegisterPage = () => {
     const router = useRouter()
 
-    const {
-        register,
-        handleSubmit,
-        watch,
-        formState: { errors },
-    } = useForm<IPatientRegisterFormdata>()
-
-
-    const onSubmit: SubmitHandler<IPatientRegisterFormdata> = async (values) => {
+    const handleRegister = async (values: FieldValues) => {
         const data = modifyPayload(values)
         // console.log(data)
         try {
@@ -94,55 +99,52 @@ const RegisterPage = () => {
 
                     {/* input filed  */}
                     <Box>
-                        <form onSubmit={handleSubmit(onSubmit)}>
+                        <PHForm
+                            onSubmit={handleRegister}
+                            resolver={zodResolver(validationSchema)}
+                            defaultValues={defaultValues}
+                        >
                             <Grid container spacing={2} my={1}>
                                 <Grid item md={12} sm={12}>
-                                    <TextField
+                                    <PHInput
                                         label="Name"
-                                        {...register("patient.name")}
-                                        variant='outlined'
+                                        name='patient.name'
                                         size='small'
                                         fullWidth={true}
                                     />
                                 </Grid>
                                 <Grid item md={6} sm={6}>
-                                    <TextField
+                                    <PHInput
                                         label="Email"
                                         type='email'
-                                        variant='outlined'
-                                        size='small'
                                         fullWidth={true}
-                                        {...register("patient.email")}
+                                        name='patient.email'
                                     />
                                 </Grid>
                                 <Grid item md={6} sm={6}>
-                                    <TextField
+                                    <PHInput
                                         label="Password"
                                         type='password'
-                                        variant='outlined'
-                                        size='small'
                                         fullWidth={true}
-                                        {...register("password")}
+                                        name="password"
                                     />
                                 </Grid>
                                 <Grid item md={6} sm={6}>
-                                    <TextField
+                                    <PHInput
                                         label="Contact Number"
                                         type='tel'
-                                        variant='outlined'
-                                        size='small'
                                         fullWidth={true}
-                                        {...register("patient.contactNumber")}
+                                        name="patient.contactNumber"
+
                                     />
                                 </Grid>
                                 <Grid item md={6} sm={6}>
-                                    <TextField
+                                    <PHInput
                                         label="Address"
                                         type='text'
-                                        variant='outlined'
-                                        size='small'
                                         fullWidth={true}
-                                        {...register("patient.address")}
+                                        name="patient.address"
+
                                     />
                                 </Grid>
                             </Grid>
@@ -150,7 +152,7 @@ const RegisterPage = () => {
                             <Typography component='p' fontWeight={300}>
                                 Do you already have an account ? <Link href='/Login' >Login</Link>
                             </Typography>
-                        </form>
+                        </PHForm>
                     </Box>
                 </Box>
             </Stack>
