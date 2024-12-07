@@ -26,8 +26,7 @@ const specialties = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.specialties]
         }),
-    }),
-    overrideExisting: false,
+    })
 });
 
 export const { useCreateSpecialtiesMutation, useGetALLSpecialtiesQuery, useDeleteSpecialtiesMutation } = specialties;

@@ -8,6 +8,9 @@ import { Button, Grid } from '@mui/material';
 import React from 'react';
 import { FieldValues } from 'react-hook-form';
 import { Gender } from "@/types/common";
+import { useCreateDoctorMutation } from '@/redux/api/doctorApi';
+import { modifyPayload } from '@/utils/modifyPayload';
+import { toast } from 'sonner';
 
 type TProps = {
     open: boolean;
@@ -15,10 +18,20 @@ type TProps = {
 }
 
 const DoctorModal = ({ open, setOpen }: TProps) => {
+    const [createDoctor] = useCreateDoctorMutation();
 
     const handleFormSubmit = async (values: FieldValues) => {
-        try {
+        values.doctor.experience = Number(values.doctor.experience)
+        values.doctor.apointmentFee = Number(values.doctor.apointmentFee)
 
+        const data = modifyPayload(values)
+        try {
+            const res = await createDoctor(data).unwrap();
+            if (res?.id) {
+                toast.success('Doctor Create Successfully');
+                setOpen(false)
+            }
+            console.log(res)
         } catch (err: any) {
             console.log(err)
         }
