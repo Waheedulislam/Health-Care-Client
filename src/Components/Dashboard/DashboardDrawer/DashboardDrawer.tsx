@@ -11,7 +11,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import SideBar from '../SideBar/SideBar';
+import { useGetSingleUserQuery } from '@/redux/api/userApi';
+import { Avatar, Badge, Stack } from '@mui/material';
+import AccountMenu from '../AccountMenu/AccountMenu';
 
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 
 const drawerWidth = 240;
 
@@ -38,20 +42,21 @@ export default function DashboardDrawer({ children }: { children: React.ReactNod
     };
 
 
-
-
+    const { data, isLoading } = useGetSingleUserQuery({})
+    // console.log(data)
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: "flex" }}>
             <CssBaseline />
             <AppBar
                 position="fixed"
                 sx={{
                     width: { sm: `calc(100% - ${drawerWidth}px)` },
                     ml: { sm: `${drawerWidth}px` },
-                    background: '#F4F7FE',
+                    background: "#F4F7FE",
                     boxShadow: 0,
-                    borderBottom: '1px solid lightGray'
+                    borderBottom: "1px solid #ddd",
+                    py: 1,
                 }}
             >
                 <Toolbar>
@@ -60,21 +65,46 @@ export default function DashboardDrawer({ children }: { children: React.ReactNod
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
-                        sx={{ mr: 2, display: { sm: 'none' }, color: 'primary.main' }}
+                        sx={{ mr: 2, display: { sm: "none" } }}
                     >
-                        <MenuIcon />
+                        <MenuIcon sx={{ color: "primary.main" }} />
                     </IconButton>
-
-                    <Box>
-                        <Typography color='gray' variant="body2" noWrap component="div">
-                            Hi, Waheedul Islam
-                        </Typography>
-
-                        <Typography color='primary.main' variant="body2" noWrap component="div">
-                            Welcome To, PH Health Care
-                        </Typography>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            width: "100%",
+                        }}
+                    >
+                        <Box>
+                            <Typography
+                                variant="body2"
+                                noWrap
+                                component="div"
+                                sx={{ color: "rgba(11, 17, 52, 0.6)" }}
+                            >
+                                Hi, {isLoading ? "Loading..." : data?.name},
+                            </Typography>
+                            <Typography
+                                variant="h6"
+                                noWrap
+                                component="div"
+                                sx={{ color: "primary.main" }}
+                            >
+                                Welcome to PH Health Care!
+                            </Typography>
+                        </Box>
+                        <Stack direction="row" gap={3}>
+                            <Badge badgeContent={1} color="primary">
+                                <IconButton sx={{ background: "#ffffff" }}>
+                                    <NotificationsNoneIcon color="action" />
+                                </IconButton>
+                            </Badge>
+                            <Avatar alt={data?.name} src={data?.profilePhoto} />
+                            <AccountMenu />
+                        </Stack>
                     </Box>
-
                 </Toolbar>
             </AppBar>
             <Box
@@ -84,7 +114,6 @@ export default function DashboardDrawer({ children }: { children: React.ReactNod
             >
                 {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
                 <Drawer
-
                     variant="temporary"
                     open={mobileOpen}
                     onTransitionEnd={handleDrawerTransitionEnd}
@@ -93,38 +122,39 @@ export default function DashboardDrawer({ children }: { children: React.ReactNod
                         keepMounted: true, // Better open performance on mobile.
                     }}
                     sx={{
-                        display: { xs: 'block', sm: 'none' },
-                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                        display: { xs: "block", sm: "none" },
+                        "& .MuiDrawer-paper": {
+                            boxSizing: "border-box",
+                            width: drawerWidth,
+                        },
                     }}
                 >
-
-                    {/* import sidebar list  */}
                     <SideBar />
-
                 </Drawer>
                 <Drawer
                     variant="permanent"
                     sx={{
-                        display: { xs: 'none', sm: 'block' },
-                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                        display: { xs: "none", sm: "block" },
+                        "& .MuiDrawer-paper": {
+                            boxSizing: "border-box",
+                            width: drawerWidth,
+                        },
                     }}
                     open
                 >
-
-                    {/* import sidebar list  */}
                     <SideBar />
-
                 </Drawer>
             </Box>
             <Box
                 component="main"
-                sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+                sx={{
+                    flexGrow: 1,
+                    p: 3,
+                    width: { sm: `calc(100% - ${drawerWidth}px)` },
+                }}
             >
                 <Toolbar />
-
-                {/* Main Content */}
-                {children}
-
+                <Box>{children}</Box>
             </Box>
         </Box>
     );

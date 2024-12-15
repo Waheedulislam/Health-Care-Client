@@ -1,13 +1,15 @@
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import dayjs from 'dayjs';
 import { SxProps } from '@mui/material';
-import { Controller, useFormContext } from 'react-hook-form';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import dayjs from 'dayjs';
+import React from 'react';
+import { Controller, useForm, useFormContext } from 'react-hook-form';
+import { TimePicker } from '@mui/x-date-pickers'
 
-interface IDatePicker {
+interface ITimePicker {
     name: string;
     size?: 'small' | 'medium';
+    placeholder?: string;
     label?: string;
     required?: boolean;
     fullWidth?: boolean;
@@ -15,8 +17,16 @@ interface IDatePicker {
 }
 
 
-const PHDatePicker = ({ name, size = 'small', label, required, fullWidth = true, sx }: IDatePicker) => {
-    const { control } = useFormContext();
+const PHTimePicker = ({
+    name,
+    label,
+    size = 'small',
+    required,
+    fullWidth = true,
+    sx,
+}: ITimePicker) => {
+    const { control, formState } = useFormContext();
+    const isError = formState.errors[name] !== undefined;
     return (
         <Controller
             name={name}
@@ -24,12 +34,11 @@ const PHDatePicker = ({ name, size = 'small', label, required, fullWidth = true,
             defaultValue={dayjs(new Date().toDateString())}
             render={({ field: { onChange, value, ...field } }) => {
                 return (<LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DesktopDatePicker
+                    <TimePicker
                         label={label}
                         {...field}
                         timezone='system'
-                        disablePast
-                        onChange={(date) => onChange(date)}
+                        onChange={(time) => onChange(time)}
                         value={value || Date.now()}
                         slotProps={{
                             textField: {
@@ -39,14 +48,17 @@ const PHDatePicker = ({ name, size = 'small', label, required, fullWidth = true,
                                     ...sx,
                                 },
                                 variant: 'outlined',
-                                fullWidth: fullWidth
+                                fullWidth: fullWidth,
+                                error: isError,
+                                helperText: isError
+                                    ? (formState.errors[name]?.message as string) : ''
                             }
                         }}
                     />
                 </LocalizationProvider>)
             }}
         />
-    )
+    );
 };
 
-export default PHDatePicker;
+export default PHTimePicker;
